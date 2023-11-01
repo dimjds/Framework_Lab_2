@@ -18,7 +18,7 @@ class Category
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'category', targetEntity: Task::class)]
+    #[ORM\OneToMany(mappedBy: 'Категория книги', targetEntity: Task::class)]
     private Collection $tasks;
 
     public function __construct()

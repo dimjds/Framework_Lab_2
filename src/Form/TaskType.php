@@ -23,9 +23,9 @@ class TaskType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => "Название",
+                'label' => "Название книги",
                 'attr' => [
-                    'placeholder' => "Введите название",
+                    'placeholder' => "Введите название книги",
                 ],
                 'constraints' => [
                     new Length(
@@ -45,9 +45,9 @@ class TaskType extends AbstractType
                 ]
             ])
             ->add('description', TextType::class, [
-                'label' => "Описание",
+                'label' => "Описание книги",
                 'attr' => [
-                    'placeholder' => "Введите описание",
+                    'placeholder' => "Введите описание книги",
                 ],
                 'constraints' => [
                     new Length(

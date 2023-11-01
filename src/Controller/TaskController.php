@@ -2,13 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Category;
 use App\Entity\Task;
 use App\Form\TaskType;
-use App\Repository\TaskRepository;
-use DateTime;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\TaskService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,8 +13,15 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route("/task", name: "app_task_")]
 class TaskController extends AbstractController
 {
+    private $taskService;
+
+    public function __construct(TaskService $taskService)
+    {
+        $this->taskService = $taskService;
+    }
+
     #[Route('/create', name: 'create')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    public function index(Request $request): Response
     {
         $task = new Task;
 
@@ -28,34 +31,30 @@ class TaskController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $task = $form->getData();
-            $entityManager->persist($task);
-            $entityManager->flush();
-            $this->addFlash('Успех!', "Задача удалена");
+            $this->taskService->createTask($task);
+            $this->addFlash('Успех!', 'Задача успешно создана');
             return $this->redirectToRoute('app_task_list');
         }
 
-
         return $this->render('task/index.html.twig', [
             'task_form' => $form,
-
-
         ]);
     }
 
     #[Route("/", name: "list")]
-    public function list(TaskRepository $taskRepository): Response
+    public function list(): Response
     {
-        $task = $taskRepository->findAll();
+        $tasks = $this->taskService->getAllTasks();
 
         return $this->render("task/list.html.twig", [
-            'tasks' => $task,
+            'tasks' => $tasks,
         ]);
     }
 
-    #[Route("/view/{id}", name: "view")]
-    public function view(int $id, TaskRepository $taskRepository): Response
+    #[Route("/book/{id}", name: "view")]
+    public function view(int $id): Response
     {
-        $task = $taskRepository->find($id);
+        $task = $this->taskService->getTaskById($id);
 
         if (!$task) {
             throw $this->createNotFoundException("Задача с номером {$id} не была найдена");
@@ -67,28 +66,24 @@ class TaskController extends AbstractController
     }
 
     #[Route("/delete/{id}", name: "delete")]
-    public function delete(int $id, EntityManagerInterface $entityManager, TaskRepository $taskRepository)
+    public function delete(int $id)
     {
-        $task = $taskRepository->find($id);
-
-
+        $task = $this->taskService->getTaskById($id);
 
         if (!$task) {
-            throw $this->createNotFoundException("Task {$id} not found");
+            throw $this->createNotFoundException("Задача с номером {$id} не была найдена");
         }
-        $entityManager->remove($task);
-        $entityManager->flush();
-        $this->addFlash('Успех!', "Таск с номером {$id} успешено удалён");
+
+        $this->taskService->deleteTask($task);
+        $this->addFlash('Успех!', "Задача с номером {$id} успешно удалена");
 
         return $this->redirectToRoute('app_task_list');
     }
 
-    // Контроллер для апдейта задач
-
     #[Route("/update/{id}", name: "update")]
-    public function update(int $id, EntityManagerInterface $entityManager, TaskRepository $taskRepository, Request $request): Response
+    public function update(int $id, Request $request): Response
     {
-        $task = $taskRepository->find($id);
+        $task = $this->taskService->getTaskById($id);
 
         if (!$task) {
             throw $this->createNotFoundException("Задача с номером {$id} не была найдена");
@@ -98,8 +93,8 @@ class TaskController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-            $this->addFlash('Успех!', "Задача с номером {$id} была добавлена");
+            $this->taskService->updateTask($task);
+            $this->addFlash('Успех!', "Задача с номером {$id} была обновлена");
             return $this->redirectToRoute('app_task_view', ['id' => $id]);
         }
 

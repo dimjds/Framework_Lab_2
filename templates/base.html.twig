@@ -20,14 +20,24 @@
         <span class="fs-4">PEGIDUDOCHNIK</span>
       </a>
 
+    
+
       <ul class="nav nav-pills">
+      
+       {% if app.user %}
         <li class="nav-item"><a href="/task" class="nav-link active" aria-current="page">Главная</a></li>
         <li class="nav-item"><a href="#" class="nav-link">Возможности</a></li>
         <li class="nav-item"><a href="#" class="nav-link">Цены</a></li>
         <li class="nav-item"><a href="#" class="nav-link">FAQ</a></li>
         <li class="nav-item"><a href="#" class="nav-link">О нас</a></li>
+        <li class="nav-item"><a href="{{path('app_logout')}}" class="nav-link">Выход</a></li>
         <a href="/task/create" class="btn btn-primary">Добавить задачу</a>
+        <a href="/register" class="btn btn-primary">Регистрация</a>
+
       </ul>
+
+      {% endif %}
+
     </header>
 
     {% for message in app.flashes('success') %}
